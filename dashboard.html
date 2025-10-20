@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <title>Pet Medical Records - Dashboard</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="app-layout">
+        <!-- Sidebar -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <div class="logo" style="display: flex; align-items: center; gap: 8px;">
+                    <img src="Pictures/pet.jpg" 
+                         alt="Pet Medical Logo" 
+                         width="50" 
+                         height="50" 
+                         style="border-radius: 6px; object-fit: cover;">
+                    <span>Pet Medical</span>
+                </div>
+                <button class="mobile-close" id="mobileClose">&times;</button>
+            </div>
+            
+            <nav class="sidebar-nav">
+                <a href="#dashboard" class="nav-item active" data-page="dashboard">
+                    <img src="pictures/dashboard.png" alt="Dashboard" class="nav-icon" width="20" height="20">
+                    Dashboard
+                </a>
+
+                <a href="#pet-registration" class="nav-item" data-page="pet-registration">
+                    <img src="pictures/add.png" alt="Pet Registration" class="nav-icon" width="20" height="20">
+                    Pet Registration
+                </a>
+
+                <a href="#medical-records" class="nav-item" data-page="medical-records">
+                    <img src="pictures/med.png" alt="Medical Records" class="nav-icon" width="20" height="20">
+                    Medical Records
+                </a>
+
+                <a href="#manage-records" class="nav-item" data-page="manage-records">
+                    <img src="pictures/medical.png" alt="Manage Records" class="nav-icon" width="20" height="20">
+                    Manage Records
+                </a>
+            </nav>
+            
+           <div class="sidebar-footer">
+    <div class="user-info">
+        <div class="user-avatar" id="userAvatar">U</div>
+        <div class="user-details">
+            <div class="user-name" id="userName">User</div>
+            <div class="user-role">Veterinarian</div>
+        </div>
+    </div>
+    <div class="user-actions">
+        <button class="logout-btn" id="logoutBtn" title="Logout">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+                <polyline points="16,17 21,12 16,7"/>
+                <line x1="21" y1="12" x2="9" y2="12"/>
+                        </svg>
+                        Logout
+                    </button>
+                </div>
+            </div>
+        </aside>
+        
+        <!-- Main Content -->
+        <main class="main-content">
+            <header class="main-header">
+                <button class="mobile-menu" id="mobileMenu">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="3" y1="6" x2="21" y2="6"/>
+                        <line x1="3" y1="12" x2="21" y2="12"/>
+                        <line x1="3" y1="18" x2="21" y2="18"/>
+                    </svg>
+                </button>
+                <h1 id="pageTitle">Dashboard</h1>
+            </header>
+            
+            <div class="content-area" id="contentArea">
+                <!-- Dynamic content will be loaded here -->
+            </div>
+        </main>
+    </div>
+    
+    <!-- Modal for record details -->
+    <div class="modal-overlay hidden" id="modalOverlay">
+        <div class="modal-content" id="modalContent">
+            <!-- Modal content will be dynamically loaded -->
+        </div>
+    </div>
+    
+    <!-- Scripts -->
+    <script src="api.js"></script>
+    <script src="auth.js"></script>
+    <script>
+        (function() {
+            function checkAuth() {
+                if (!localStorage.getItem("isLoggedIn") || localStorage.getItem("isLoggedIn") !== "true") {
+                    window.location.href = "index.html";
+                    return;
+                }
+            }
+            checkAuth();
+            document.addEventListener('visibilitychange', function() {
+                if (!document.hidden) checkAuth();
+            });
+            window.addEventListener('focus', checkAuth);
+            window.addEventListener('pageshow', function(event) {
+                if (event.persisted) checkAuth();
+            });
+        })();
+    </script>
+
+    <input type="file" id="importFileInput" accept=".db" style="display: none;">
+    
+    <script src="database.js"></script>
+    <script src="api.js"></script>
+    <script src="auth.js"></script>
+    <script src="app.js"></script>
+    <script src="dashboard-content.js"></script>
+    <script src="pet-registration.js"></script>
+    <script src="medical-records.js"></script>
+    <script src="manage-records.js"></script>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const exportBtn = document.getElementById('exportBtn');
+            const importBtn = document.getElementById('importBtn');
+            const importFileInput = document.getElementById('importFileInput');
+            
+            if (exportBtn) {
+                exportBtn.addEventListener('click', function() {
+                    if (window.database && window.database.exportDatabase) {
+                        window.database.exportDatabase();
+                        alert('Database exported successfully!');
+                    } else {
+                        alert('Database export not available');
+                    }
+                });
+            }
+            
+            if (importBtn) {
+                importBtn.addEventListener('click', function() {
+                    importFileInput.click();
+                });
+            }
+            
+            if (importFileInput) {
+                importFileInput.addEventListener('change', async function(event) {
+                    const file = event.target.files[0];
+                    if (file) {
+                        if (window.database && window.database.importDatabase) {
+                            const success = await window.database.importDatabase(file);
+                            if (success) {
+                                alert('Database imported successfully! Please refresh the page.');
+                                location.reload();
+                            } else {
+                                alert('Failed to import database. Please check the file format.');
+                            }
+                        } else {
+                            alert('Database import not available');
+                        }
+                    }
+                });
+            }
+        });
+    </script>
+</body>
+</html>
